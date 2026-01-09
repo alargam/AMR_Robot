@@ -1,0 +1,34 @@
+# NOTE: This config file is only for Node parameters; static transforms must be passed as arguments in the Launch file.
+
+ldlidar_node:
+  ros__parameters:
+    # LiDAR Model
+    product_name: "LDLiDAR_LD06"
+
+    # Topics
+    laser_scan_topic_name: "scan"
+    point_cloud_2d_topic_name: "pointcloud2d"
+
+    # Frames
+    frame_id: "lidar_link"
+
+    # Serial port & baudrate
+    port_name: "/dev/ttyAMA0"
+    serial_baudrate: 230400
+
+    # Scan options
+    laser_scan_dir: true             # Counter-clockwise rotation
+    enable_angle_crop_func: false    # Full 360° scan
+    angle_crop_min: 0.02             # Optional if cropping enabled
+    angle_crop_max: 12               # Optional if cropping enabled
+
+# Static transform (base_link -> lidar_link)
+static_transform:
+  x: 0.0
+  y: 0.0
+  z: 0.18
+  roll: 0.0
+  pitch: 0.0
+  yaw: 0.0
+  parent_frame: "base_link"
+  child_frame: "lidar_link"
