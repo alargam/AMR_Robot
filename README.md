@@ -1,117 +1,150 @@
-# 🤖 AMR Autonomous Mobile Robot - ROS 2 Jazzy (2026)
+# 🤖 AMR Autonomous Mobile Robot – ROS 2 Jazzy (2026)
 
-This repository contains the **hardware bringup and software integration** for an **Autonomous Mobile Robot (AMR)** running **ROS 2 Jazzy** on a **Raspberry Pi 5**.
+This repository contains the **hardware bringup and full software integration** for an **Autonomous Mobile Robot (AMR)** developed as a **Mechatronics Engineering Graduation Project (2026)**.
 
-The system integrates:
-
-* 🟦 Orbbec Astra Pro depth camera
-* 🔴 LD06 2D LiDAR
-* 🟢 ESP32 (via micro-ROS)
-
-to form a complete **SLAM, Localization, and Navigation stack**.
+The system runs **ROS 2 Jazzy** on a **Raspberry Pi 5** and integrates multiple sensors and controllers to form a complete **SLAM, Localization, and Navigation stack**.
 
 ---
 
-## 🚀 Quick Start (Aliases)
+## 🧩 System Overview
 
-To simplify operation, the following custom aliases are configured:
+The AMR platform integrates the following hardware components:
 
-| Command        | Action                                             |
-| -------------- | -------------------------------------------------- |
-| `start_camera` | Launches the Orbbec Astra Pro camera (RGB + Depth) |
-| `start_lidar`  | Launches the LD06 LiDAR for 360° scanning          |
-| `start_esp`    | Starts the micro-ROS Agent (ESP32 communication)   |
-| `check_topics` | Lists all active ROS 2 topics                      |
-| `start_all`  | Launches Camera + LiDAR + micro-ROS together       |
+* 🟦 **Orbbec Astra Pro** – RGB-D depth camera
+* 🔴 **LD06** – 2D LiDAR (360° scanning)
+* 🟢 **ESP32** – Low-level motor control & sensor interface via **micro-ROS**
+
+These components are fused in ROS 2 to enable:
+
+* Real-time perception
+* Accurate odometry & localization
+* Mapping (SLAM)
+* Autonomous navigation (Nav2-ready)
+
+---
+
+## 🚀 Quick Start (Shell Aliases)
+
+To simplify operation and field testing, the following custom aliases are configured:
+
+| Command        | Action                                     |
+| -------------- | ------------------------------------------ |
+| `start_camera` | Launch Orbbec Astra Pro (RGB + Depth)      |
+| `start_lidar`  | Launch LD06 LiDAR (LaserScan)              |
+| `start_esp`    | Start micro-ROS Agent (ESP32 bridge)       |
+| `check_topics` | List all active ROS 2 topics               |
+| `start_all`    | Launch Camera + LiDAR + micro-ROS together |
 
 ---
 
 ## 🏗️ System Architecture
 
-### Core Nodes
+### 🔁 Data Flow (High Level)
 
-#### 1. Robot State Publisher (RSP)
+Encoders + IMU → **micro-ROS (ESP32)** → `/odom_raw`
+LiDAR → `/scan`
+Camera → RGB / Depth Topics
 
-**Purpose:**
-
-* Reads the URDF file and publishes the TF tree
-
-**Function:**
-
-* Defines physical relationships between frames
-* Example: `base_link → lidar_link`, `base_link → camera_link`
+All sensor data is fused using **EKF (robot_localization)** to produce `/odometry/filtered`, which is then used by **SLAM Toolbox** and **Navigation2**.
 
 ---
 
-#### 2. Astra Camera Node (Triple Lens System)
+## 🧱 Core ROS 2 Nodes
 
-**Purpose:**
+### 1️⃣ Robot State Publisher (RSP)
 
-* ROS 2 driver for the **Orbbec Astra Pro** depth camera
+**Purpose**
 
-**Data Streams:**
+* Publishes the robot TF tree from URDF
 
-* **RGB Lens:** Color video for perception
-* **Depth Lens:** Distance measurement via structured light
-* **IR Lens:** Low-light depth operation
+**Function**
 
-**Key Topics:**
+* Defines all rigid-body relationships
+* Example frames:
+
+  * `base_link → lidar_link`
+  * `base_link → camera_link`
+  * `base_link → imu_link`
+
+---
+
+### 2️⃣ Orbbec Astra Pro Camera Node
+
+**Purpose**
+
+* RGB-D perception using structured light depth sensing
+
+**Data Streams**
+
+* RGB Image
+* Depth Image
+* Infrared Image
+
+**Key Topics**
 
 * `/camera/color/image_raw`
 * `/camera/depth/image_raw`
-* `/camera/depth/points` *(PointCloud2)*
+* `/camera/depth/points`
 
 ---
 
-#### 3. micro-ROS Agent
+### 3️⃣ micro-ROS Agent (ESP32 Bridge)
 
-**Purpose:**
+**Purpose**
 
-* Bridge between Raspberry Pi 5 and ESP32
+* Real-time communication between ESP32 and ROS 2
 
-**Function:**
+**Responsibilities**
 
-* Encoder data (Odometry)
-* IMU data
-* Motor control commands (PWM)
+* Wheel encoder publishing
+* IMU data publishing
+* Motor command reception (`cmd_vel`)
+* PWM-based motor control
 
----
+**Transport**
 
-#### 4. LDLiDAR Node
-
-**Purpose:**
-
-* Processes raw laser scan data from the **LD06 LiDAR**
-
-**Function:**
-
-* Publishes `/scan` topic
-* Provides 360° environment perception
+* Serial (USB)
 
 ---
 
-#### 5. EKF Node (robot_localization)
+### 4️⃣ LD06 LiDAR Node
 
-**Purpose:**
+**Purpose**
 
-* Sensor fusion
+* 2D laser scanning for perception and SLAM
 
-**Function:**
+**Function**
 
-* Fuses encoder + IMU data
-* Outputs filtered, drift-reduced pose estimate
+* Publishes `/scan`
+* 360° planar environment sensing
 
 ---
 
-#### 6. SLAM Toolbox
+### 5️⃣ EKF Node – robot_localization
 
-**Purpose:**
+**Purpose**
 
-* Mapping & Localization
+* Sensor fusion and state estimation
 
-**Function:**
+**Function**
 
-* Real-time SLAM using LiDAR scans and EKF pose
+* Fuses wheel encoders and IMU data
+* Outputs `/odometry/filtered`
+
+**Standards**
+
+* REP-105 compliant
+* TF chain: `map → odom → base_link`
+
+### 6️⃣ SLAM Toolbox
+
+**Purpose**
+
+* 2D mapping and localization
+
+**Function**
+
+* Uses LiDAR scans and EKF-filtered odometry
 
 ---
 
@@ -120,18 +153,22 @@ To simplify operation, the following custom aliases are configured:
 ```
 AMR_Robot/
 ├── src/
-│   ├── ros2_astra_camera/      # Orbbec Astra Pro driver
-│   ├── ldlidar_ros2/           # LD06 LiDAR driver
-│   ├── micro-ROS-Agent/        # micro-ROS serial agent
-│   ├── my_robot_description/   # URDF, meshes, launch files
-│   └── navigation/             # SLAM & localization configs
+│   ├── hardware/
+│   │   ├── ldlidar_ros2/
+│   │   ├── micro-ROS-Agent/
+│   │   └── ros2_astra_camera/
+│   ├── my_robot_description/
+│   │   ├── urdf/
+│   │   └── mesh/
+│   └── robot_bringup/
+│       ├── launch/
+│       ├── config/
+│       └── scripts/
 ```
 
 ---
 
 ## 🛠️ Build & Installation
-
-### Clone & Build
 
 ```bash
 cd ~/AMR_Robot
@@ -141,13 +178,9 @@ source install/setup.bash
 
 ### Permissions
 
-Allow access to serial and USB devices:
-
 ```bash
 sudo usermod -a -G dialout $USER
 ```
-
-> 🔄 Reboot or log out/in after this step.
 
 ---
 
@@ -156,7 +189,7 @@ sudo usermod -a -G dialout $USER
 ### Orbbec Astra Camera
 
 ```bash
-cd src/ros2_astra_camera/astra_camera/scripts
+cd src/hardware/ros2_astra_camera/astra_camera/scripts
 sudo bash install.sh
 sudo udevadm control --reload-rules
 sudo udevadm trigger
@@ -165,13 +198,13 @@ sudo udevadm trigger
 ### LD06 LiDAR
 
 ```bash
-cd src/ldlidar_ros2/scripts
+cd src/hardware/ldlidar_ros2/scripts
 sudo bash create_udev_rules.sh
 sudo udevadm control --reload-rules
 sudo udevadm trigger
 ```
 
-Creates a fixed device symlink such as:
+Creates a fixed device name such as:
 
 ```
 /dev/ttyUSB_lidar
@@ -181,67 +214,35 @@ Creates a fixed device symlink such as:
 
 ## ⏱️ Recommended Startup Workflow
 
-1. Start Robot State Publisher (URDF & TF)
-2. Start micro-ROS Agent (ESP32)
-3. Start LiDAR and Camera
-4. Launch EKF (sensor fusion)
-5. Launch SLAM Toolbox (after TF stabilizes)
-
----
-## 🔗 References & Official Drivers
-
-This project utilizes several **official ROS 2 drivers and stacks** to enable autonomous navigation and sensor fusion.  
-Below are the key repositories and documentation sources used in this project.
+1. Robot State Publisher
+2. micro-ROS Agent
+3. LiDAR & Camera
+4. EKF (robot_localization)
+5. SLAM Toolbox
+6. Navigation2 (optional)
 
 ---
 
-### 🛠️ Middleware & Communication
+## 🔗 References
 
-- 🔌 **micro-ROS Agent**  
-  Bridge between the ESP32-S3 and the ROS 2 workspace  
-  👉 https://github.com/micro-ROS/micro-ROS-Agent
-
-- 🔌 **micro-ROS Arduino (Client)**  
-  micro-ROS client library for Arduino-based microcontrollers  
-  👉 https://github.com/micro-ROS/micro_ros_arduino
-
----
-
-### 🛰️ Perception & Sensors
-
-- 🔴 **LD06 LiDAR Driver**  
-  Official ROS 2 driver for the LDROBOT LD06 LiDAR sensor  
-  👉 https://github.com/ldrobotSensorTeam/ldlidar_ros2
-
-- 📷 **Orbbec Astra Camera**  
-  ROS 2 driver for Astra Series depth cameras  
-  👉 https://github.com/orbbec/ros2_astra_camera
-
----
-
-### 🧭 Navigation & Localization
-
-- 🗺️ **Navigation 2 (Nav2) Stack**  
-  Professional-grade navigation framework for ROS 2  
-  👉 https://github.com/ros-navigation/navigation2
-
-- 🧭 **SLAM Toolbox**  
-  Advanced 2D SLAM for map building and localization  
-  👉 https://github.com/SteveMacenski/slam_toolbox
-
-- 📐 **Robot Localization**  
-  Extended Kalman Filter (EKF) for fusing odometry and sensor data  
-  👉 https://github.com/cra-ros-pkg/robot_localization
+* micro-ROS Agent: [https://github.com/micro-ROS/micro-ROS-Agent](https://github.com/micro-ROS/micro-ROS-Agent)
+* micro-ROS Arduino: [https://github.com/micro-ROS/micro_ros_arduino](https://github.com/micro-ROS/micro_ros_arduino)
+* LD06 LiDAR: [https://github.com/ldrobotSensorTeam/ldlidar_ros2](https://github.com/ldrobotSensorTeam/ldlidar_ros2)
+* Orbbec Astra: [https://github.com/orbbec/ros2_astra_camera](https://github.com/orbbec/ros2_astra_camera)
+* Navigation2: [https://github.com/ros-navigation/navigation2](https://github.com/ros-navigation/navigation2)
+* SLAM Toolbox: [https://github.com/SteveMacenski/slam_toolbox](https://github.com/SteveMacenski/slam_toolbox)
+* Robot Localization: [https://github.com/cra-ros-pkg/robot_localization](https://github.com/cra-ros-pkg/robot_localization)
 
 ---
 
 ## 🧠 Future Work
 
-* Navigation2 integration
+* Full Navigation2 integration
 * Autonomous waypoint navigation
-* Sensor redundancy & fault detection
+* Sensor redundancy & diagnostics
 * Visualization dashboard
 
 ---
 
 > Built with ❤️ for ROS 2 Jazzy & Autonomous Robotics
+> AMR Graduation Project – Mechatronics Engineering (2026)
