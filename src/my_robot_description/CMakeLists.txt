@@ -6,17 +6,14 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# 2. Find dependencies [cite: 2025-10-22]
+# 2. Find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 
-# 3. Install directories (CRITICAL for SLAM and Launch to work) [cite: 2025-10-22]
+# 3. Install directories (CRITICAL for SLAM and Launch to work) 
 install(DIRECTORY 
-  launch 
-  config 
   urdf 
   mesh
-  maps
   DESTINATION share/${PROJECT_NAME}
 )
 
@@ -26,5 +23,5 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-# 5. Export package [cite: 2025-10-22]
+# 5. Export package
 ament_package()

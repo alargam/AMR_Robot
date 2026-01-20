@@ -3,25 +3,15 @@
 <package format="3">
   <name>my_robot_description</name>
   <version>1.0.0</version>
-  <description>Hardware bringup package for Amr's AMR Project - Real Robot</description>
+  <description>Robot URDF description and STL mesh definitions for the AMR project</description>
   <maintainer email="amr@todo.todo">Amr</maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <depend>rclcpp</depend>
-  <depend>robot_state_publisher</depend>
-  <depend>tf2_ros</depend>
-  <depend>geometry_msgs</depend>
-
-  <depend>micro_ros_agent</depend>
-  <depend>ldlidar_ros2</depend>
-  <depend>rosbridge_server</depend>
-  <depend>rosapi</depend>
-  <depend>slam_toolbox</depend>
-  <depend>xacro</depend>
-  <depend>joint_state_publisher</depend>
-  <depend>astra_camera</depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>joint_state_publisher</exec_depend>
+  <exec_depend>xacro</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
