@@ -1,99 +1,85 @@
-import rclpy
-from rclpy.node import Node
-from std_msgs.msg import Int32
-from nav_msgs.msg import Odometry
-from geometry_msgs.msg import Quaternion, TransformStamped
-import tf2_ros
-import math
+import os
+from ament_index_python.packages import get_package_share_directory
+from launch import LaunchDescription
+from launch.actions import IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch_ros.actions import Node
+from launch.substitutions import Command
 
-class OdomBridge(Node):
-    def __init__(self):
-        super().__init__('odom_bridge')
-        
-        # 1. Subscriptions for Encoder Ticks (from ESP32 via micro-ROS)
-        # Using the persistent device /dev/esp32 connection implicitly
-        self.create_subscription(Int32, '/encoder_left', self.left_cb, 10)
-        self.create_subscription(Int32, '/encoder_right', self.right_cb, 10)
-        
-        # 2. Publisher for Raw Wheel Odometry
-        # EKF node will consume this topic
-        self.odom_pub = self.create_publisher(Odometry, '/odom/wheel', 10)
-        
-        # 3. Robot Kinematics (Meters and SI Units)
-        # Corrected units: 3.3cm = 0.033m
-        self.declare_parameter('wheel_radius', 0.033) 
-        self.declare_parameter('wheel_separation', 0.17)
-        self.declare_parameter('ticks_per_rev', 15.0)
-        
-        self.radius = self.get_parameter('wheel_radius').value
-        self.sep = self.get_parameter('wheel_separation').value
-        self.tpr = self.get_parameter('ticks_per_rev').value
+def generate_launch_description():
+    
+    # =========================================================================
+    # 1. PATH CONFIGURATION
+    # Locate the directories for your robot's description, lidar driver, 
+    # and the main bringup package.
+    # =========================================================================
+    description_pkg = get_package_share_directory('my_robot_description')
+    lidar_pkg = get_package_share_directory('ldlidar_ros2')
+    bringup_pkg = get_package_share_directory('robot_bringup')
 
-        # State Variables
-        self.x = 0.0
-        self.y = 0.0
-        self.th = 0.0
-        self.l_ticks = 0
-        self.r_ticks = 0
-        self.prev_l = 0
-        self.prev_r = 0
-        
-        self.last_time = self.get_clock().now()
-        self.create_timer(0.05, self.compute_odom) # 20Hz update
+    # Path to the URDF model exported from SolidWorks
+    urdf_model_path = os.path.join(description_pkg, 'urdf', 'amr_robot.urdf')
 
-    def left_cb(self, msg): self.l_ticks = msg.data
-    def right_cb(self, msg): self.r_ticks = msg.data
+    # =========================================================================
+    # 2. ROBOT STATE PUBLISHER
+    # This node parses the URDF and publishes the static TF tree.
+    # It tells ROS exactly where the 'lidar_link' and wheels are located 
+    # relative to 'base_link'.
+    # =========================================================================
+    robot_state_publisher = Node(
+        package='robot_state_publisher',
+        executable='robot_state_publisher',
+        name='robot_state_publisher',
+        output='screen',
+        parameters=[{'robot_description': Command(['xacro ', urdf_model_path])}]
+    )
 
-    def compute_odom(self):
-        current_time = self.get_clock().now()
-        dt = (current_time - self.last_time).nanoseconds / 1e9
-        if dt <= 0: return
+    # =========================================================================
+    # 3. LIDAR DRIVER (LD06)
+    # Includes the launch file for the LDLiDAR. It will start rotating 
+    # and publishing /scan data.
+    # =========================================================================
+    lidar_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(lidar_pkg, 'launch', 'ld06.launch.py')
+        )
+    )
 
-        # Calculate distance traveled by each wheel
-        # Distance = $\frac{\Delta ticks}{TicksPerRev} \times 2\pi R$
-        d_l = ((self.l_ticks - self.prev_l) / self.tpr) * (2 * math.pi * self.radius)
-        d_r = ((self.r_ticks - self.prev_r) / self.tpr) * (2 * math.pi * self.radius)
-        
-        self.prev_l, self.prev_r = self.l_ticks, self.r_ticks
+    # =========================================================================
+    # 4. MICRO-ROS AGENT
+    # This node is the bridge to your ESP32. We run it as a 'Node' with 
+    # arguments to match the manual terminal command that worked.
+    # -b 115200: Matches the baud rate in your Arduino code.
+    # --dev /dev/esp32: Matches your custom udev rule.
+    # =========================================================================
+    microros_node = Node(
+        package='micro_ros_agent',
+        executable='micro_ros_agent',
+        name='micro_ros_agent',
+        output='screen',
+        arguments=['serial', '--dev', '/dev/esp32', '-b', '921600']
+    )
 
-        # Linear and Angular displacement
-        d_dist = (d_r + d_l) / 2.0
-        d_th = (d_r - d_l) / self.sep
+    # =========================================================================
+    # 5. EKF FILTER (ROBOT LOCALIZATION)
+    # The brain for robot positioning. It listens to the raw /odom from 
+    # the ESP32 and provides a smooth, filtered transform between 
+    # 'odom' and 'base_link'.
+    # =========================================================================
+    ekf_node = Node(
+        package='robot_localization',
+        executable='ekf_node',
+        name='ekf_filter_node',
+        output='screen',
+        parameters=[os.path.join(bringup_pkg, 'config', 'ekf.yaml')]
+    )
 
-        # Update Pose
-        self.x += d_dist * math.cos(self.th)
-        self.y += d_dist * math.sin(self.th)
-        self.th += d_th
-
-        # Prepare Odometry Message
-        odom = Odometry()
-        odom.header.stamp = current_time.to_msg()
-        odom.header.frame_id = 'odom'
-        odom.child_frame_id = 'base_link'
-
-        # Position
-        odom.pose.pose.position.x = self.x
-        odom.pose.pose.position.y = self.y
-        odom.pose.pose.orientation.z = math.sin(self.th / 2.0)
-        odom.pose.pose.orientation.w = math.cos(self.th / 2.0)
-
-        # Velocity (Twist) - Important for EKF
-        odom.twist.twist.linear.x = d_dist / dt
-        odom.twist.twist.angular.z = d_th / dt
-
-        self.odom_pub.publish(odom)
-        self.last_time = current_time
-
-def main(args=None):
-    rclpy.init(args=args)
-    node = OdomBridge()
-    try:
-        rclpy.spin(node)
-    except KeyboardInterrupt:
-        pass
-    finally:
-        node.destroy_node()
-        rclpy.shutdown()
-
-if __name__ == '__main__':
-    main()
+    # =========================================================================
+    # 6. ASSEMBLE ALL COMPONENTS
+    # =========================================================================
+    return LaunchDescription([
+        robot_state_publisher,
+        lidar_launch,
+        microros_node,
+        ekf_node
+    ])

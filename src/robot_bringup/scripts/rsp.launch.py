@@ -10,7 +10,7 @@ from launch_ros.parameter_descriptions import ParameterValue
 def generate_launch_description():
 
     pkg_dir = get_package_share_directory('my_robot_description')
-    urdf_path = os.path.join(pkg_dir, 'urdf', 'amr_robot.SLDASM.urdf')
+    urdf_path = os.path.join(pkg_dir, 'urdf', 'amr_robot.urdf')
 
     use_sim_time = LaunchConfiguration('use_sim_time')
 

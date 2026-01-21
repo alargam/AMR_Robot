@@ -4,13 +4,13 @@
 
 # 1. LiDAR (LD06) - Support for both USB and GPIO
 # Rule for USB (CP210x)
-KERNEL=="ttyUSB*|ttyACM*", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666", SYMLINK+="ldlidar"
+KERNEL=="ttyUSB*", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0666", SYMLINK+="ldlidar"
 # Rule for GPIO (if used)
 KERNEL=="ttyAMA0", SYMLINK+="ldlidar", MODE="0666"
 
 # 2. ESP32 (micro-ROS) - Persistent name for your nervous system
 # Note: Replace Vendor/Product IDs if different (check with lsusb)
-KERNEL=="ttyACM*|ttyUSB*", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", MODE="0666", SYMLINK+="esp32"
+KERNEL=="ttyACM*", ATTRS{idVendor}=="303a", ATTRS{idProduct}=="1001", MODE="0666", SYMLINK+="esp32"
 
 # 3. Generic GPIO link (Backup)
 KERNEL=="ttyAMA0", SYMLINK+="robot_core_serial", MODE="0666"

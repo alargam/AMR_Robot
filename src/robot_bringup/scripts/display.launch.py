@@ -8,7 +8,7 @@ from launch_ros.parameter_descriptions import ParameterValue
 def generate_launch_description():
 
     package_name = 'my_robot_description'
-    urdf_file_name = 'amr_robot.SLDASM.urdf'
+    urdf_file_name = 'amr_robot.urdf'
 
     pkg_share = get_package_share_directory(package_name)
     urdf_path = os.path.join(pkg_share, 'urdf', urdf_file_name)

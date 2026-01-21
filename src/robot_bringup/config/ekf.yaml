@@ -18,12 +18,12 @@ ekf_filter_node:
                    false, false, true,  # VRoll, VPitch, VYaw
                    false, false, false] # Ax, Ay, Az
 
-    # 2. إعدادات الـ IMU القادمة من ESP32
-    imu0: /imu/data
-    imu0_config: [false, false, false, # لا نحتاج للموقع من الـ IMU
-                  false, false, true,  # نأخذ الـ Yaw (التوجيه) فقط
-                  false, false, false,
-                  false, false, true,  # نأخذ السرعة الزاوية
-                  true,  true,  false] # نأخذ التسارع الخطي (X, Y)
+    # # 2. إعدادات الـ IMU القادمة من ESP32
+    # imu0: /imu/data
+    # imu0_config: [false, false, false, # لا نحتاج للموقع من الـ IMU
+    #               false, false, true,  # نأخذ الـ Yaw (التوجيه) فقط
+    #               false, false, false,
+    #               false, false, true,  # نأخذ السرعة الزاوية
+    #               true,  true,  false] # نأخذ التسارع الخطي (X, Y)
 
-    imu0_remove_gravitational_acceleration: true
+    # imu0_remove_gravitational_acceleration: true
