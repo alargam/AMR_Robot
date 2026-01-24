@@ -33,7 +33,7 @@ def generate_launch_description():
         {'laser_scan_topic_name': 'scan'},
         {'point_cloud_2d_topic_name': 'pointcloud2d'},
         {'frame_id': 'lidar_link'},
-        {'port_name': '/dev/ldlidar'},
+        {'port_name': '/dev/ttyAMA0'},  # Fixed: Use correct port for Raspberry Pi
         {'serial_baudrate': 230400},
         {'laser_scan_dir': True},
         {'enable_angle_crop_func': False},

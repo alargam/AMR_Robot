@@ -5,7 +5,7 @@
   <joint name="base_joint" type="fixed">
         <parent link="base_footprint" />
         <child link="base_link" />
-        <origin xyz="0 0 0.1" rpy="0 0 0"/>
+        <origin xyz="0 0 0.02" rpy="0 0 0"/>
   </joint>
 
   <link name="base_link">
@@ -177,7 +177,7 @@
     </collision>
   </link>
   <joint name="lidar_joint" type="fixed">
-    <origin xyz="0.03872 0.00389 0.267" rpy="0 0 0" />
+    <origin xyz="0.03872 0.00389 0.36" rpy="0 0 0" />
     <parent link="base_link" />
     <child link="lidar_link" />
   </joint>
@@ -194,7 +194,7 @@
     </collision>
   </link>
   <joint name="camera_joint" type="fixed">
-    <origin xyz="0.25622 0.01 0.137" rpy="0 0 0" />
+    <origin xyz="0.25622 0.01 0.20" rpy="0 0 0" />
     <parent link="base_link" />
     <child link="camera_link" />
   </joint>
@@ -211,7 +211,7 @@
     </collision>
   </link>
   <joint name="gps_joint" type="fixed">
-    <origin xyz="0.039 0.039 0.24251" rpy="0 0 0" />
+    <origin xyz="0.039 0.039 0.31" rpy="0 0 0" />
     <parent link="base_link" />
     <child link="gps_link" />
   </joint>
@@ -228,7 +228,7 @@
     </collision>
   </link>
   <joint name="Tof_F_joint" type="fixed">
-    <origin xyz="0.25622 0.0018543 -0.015494" rpy="0 0 0" />
+    <origin xyz="0.25622 0.0018543 0.10" rpy="0 0 0" />
     <parent link="base_link" />
     <child link="Tof_F_Link" />
   </joint>
@@ -245,7 +245,7 @@
     </collision>
   </link>
   <joint name="Tof_FL_joint" type="fixed">
-    <origin xyz="0.22272 0.18435 0.10731" rpy="0 0 0" />
+    <origin xyz="0.22272 0.18435 0.16" rpy="0 0 0" />
     <parent link="base_link" />
     <child link="Tof_FL_link" />
   </joint>
@@ -262,7 +262,7 @@
     </collision>
   </link>
   <joint name="Tof_FR_joint" type="fixed">
-    <origin xyz="0.21875 -0.17665 0.10731" rpy="0 0 0" />
+    <origin xyz="0.21875 -0.17665 0.16" rpy="0 0 0" />
     <parent link="base_link" />
     <child link="Tof_FR_link" />
   </joint>
@@ -283,7 +283,7 @@
     </collision>
   </link>
   <joint name="Tof_BL_joint" type="fixed">
-    <origin xyz="-0.19428 0.21469 0.00050624" rpy="0 0 0" />
+    <origin xyz="-0.19428 0.21469 0.10" rpy="0 0 0" />
     <parent link="base_link" />
     <child link="Tof_BL_link" />
   </joint>
@@ -300,15 +300,14 @@
     </collision>
   </link>
   <joint name="Tof_BR_joint" type="fixed">
-    <origin xyz="-0.29478 -0.12406 0.044506" rpy="0 0 0" />
+    <origin xyz="-0.29478 -0.12406 0.10" rpy="0 0 0" />
     <parent link="base_link" />
     <child link="Tof_BR_link" />
   </joint>
 
 <!-- from here i make changing in code -->
 <!-- the next code used for control in moning in gazebo -->
-
-  <gazebo>
+<gazebo>
     <plugin name='front_diff_drive' filename='libgazebo_ros_diff_drive.so'>
       <ros>
         <namespace>/</namespace>
@@ -320,7 +319,7 @@
       <right_joint>front_right_wheel_joint</right_joint>
 
       <wheel_separation>0.44</wheel_separation>
-      <wheel_diameter>0.15</wheel_diameter>
+      <wheel_diameter>0.16</wheel_diameter> 
       
       <max_wheel_torque>200</max_wheel_torque>
       <max_wheel_acceleration>10.0</max_wheel_acceleration>
@@ -329,7 +328,7 @@
       <publish_odom_tf>true</publish_odom_tf>
       <publish_wheel_tf>true</publish_wheel_tf>
       <odometry_frame>odom</odometry_frame>
-      <robot_base_frame>base_footprint</robot_base_frame>
+      <robot_base_frame>base_link</robot_base_frame> 
     </plugin>
 
     <plugin name='back_diff_drive' filename='libgazebo_ros_diff_drive.so'>
@@ -342,7 +341,7 @@
       <right_joint>back_right_wheel_joint</right_joint>
 
       <wheel_separation>0.44</wheel_separation>
-      <wheel_diameter>0.15</wheel_diameter>
+      <wheel_diameter>0.16</wheel_diameter>
       
       <max_wheel_torque>200</max_wheel_torque>
       <max_wheel_acceleration>10.0</max_wheel_acceleration>
@@ -351,16 +350,17 @@
       <publish_odom_tf>false</publish_odom_tf>
       <publish_wheel_tf>true</publish_wheel_tf>
       <odometry_frame>odom</odometry_frame>
-      <robot_base_frame>base_footprint</robot_base_frame>
+      <robot_base_frame>base_link</robot_base_frame>
     </plugin>
   </gazebo>
-
 <!-- this code for control in lidar scan -->
 
-  <gazebo reference="lidar_link"> <sensor name="lidar" type="ray">
+  <gazebo reference="lidar_link"> 
+    <sensor name="lidar" type="ray">
       <pose>0 0 0 0 0 0</pose>
       <always_on>true</always_on>
-      <visualize>true</visualize> <update_rate>5</update_rate>
+      <visualize>true</visualize> 
+      <update_rate>10</update_rate> 
       <ray>
         <scan>
           <horizontal>
@@ -371,8 +371,7 @@
           </horizontal>
         </scan>
         <range>
-          <min>0.120</min>
-          <max>12.0</max> <resolution>0.015</resolution>
+          <min>0.12</min> <max>12.0</max> <resolution>0.015</resolution>
         </range>
         <noise>
           <type>gaussian</type>
@@ -385,7 +384,7 @@
           <remapping>~/out:=scan</remapping>
         </ros>
         <output_type>sensor_msgs/LaserScan</output_type>
-        <frame_name>lidar_link</frame_name> </plugin>
+        <frame_name>lidar_link</frame_name> 
+      </plugin>
     </sensor>
   </gazebo>
-</robot>

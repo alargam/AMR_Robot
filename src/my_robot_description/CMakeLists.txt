@@ -1,27 +1,23 @@
 cmake_minimum_required(VERSION 3.8)
 project(my_robot_description)
 
-# 1. Compiler settings
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# 2. Find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 
-# 3. Install directories (CRITICAL for SLAM and Launch to work) 
 install(DIRECTORY 
   urdf 
-  mesh
+  meshs
+  config
   DESTINATION share/${PROJECT_NAME}
 )
 
-# 4. Testing (Standard ROS 2)
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-# 5. Export package
 ament_package()
