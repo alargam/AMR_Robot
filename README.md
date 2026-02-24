@@ -5,7 +5,19 @@ An end-to-end **Autonomous Mobile Robot (AMR)** platform developed as a Mechatro
 
 This project integrates real-time perception, sensor fusion, embedded motor control, SLAM, and autonomous navigation into a complete robotic system designed using ROS 2 Jazzy best practices.
 
+---
+
 You can visit the official project website for more details: [https://delivero.site/](https://delivero.site/)
+
+---
+
+## 🎥 Demonstration
+
+Mapping Demo: [link](https://www.youtube.com/shorts/1S7ldnf2kuI)
+
+Autonomous Navigation Demo: [link](https://youtu.be/pdu4tVg_QxQ?si=NQ7DHxntDtQeoHpF)
+
+Real-World Robot Demo [link](https://www.youtube.com/shorts/1S7ldnf2kuI)
 
 ---
 
@@ -156,19 +168,7 @@ source install/setup.bash
 ```bash
 start_robot
 ```
----
 
-
-## 🎥 Demonstration
-
-Mapping Demo: [link](https://www.youtube.com/shorts/1S7ldnf2kuI)
-
-Autonomous Navigation Demo: [link](https://youtu.be/pdu4tVg_QxQ?si=NQ7DHxntDtQeoHpF)
-
-Real-World Robot Demo [link](https://www.youtube.com/shorts/1S7ldnf2kuI)
-
-
----
 ## 🧠 Engineering Highlights
 
 ```
