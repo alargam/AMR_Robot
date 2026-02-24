@@ -5,6 +5,8 @@ An end-to-end **Autonomous Mobile Robot (AMR)** platform developed as a Mechatro
 
 This project integrates real-time perception, sensor fusion, embedded motor control, SLAM, and autonomous navigation into a complete robotic system designed using ROS 2 Jazzy best practices.
 
+You can visit the official project website for more details: [https://delivero.site/](https://delivero.site/)
+
 ---
 
 # 📸 System Overview
