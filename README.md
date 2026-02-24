@@ -9,16 +9,6 @@ You can visit the official project website for more details: [https://delivero.s
 
 ---
 
-# 📸 System Overview
-
-![Robot](images/robot.jpg)
-![RViz Screenshot](images/rviz_screenshot.png)
-![rqt_graph Screenshot](images/rqt_graph.png)
-
-[link](https://www.youtube.com/shorts/1S7ldnf2kuI)
-
----
-
 # 🏗️ System Architecture
 
 
@@ -171,9 +161,12 @@ start_robot
 
 ## 🎥 Demonstration
 
-Mapping demo: [link](https://www.youtube.com/shorts/1S7ldnf2kuI)
+Mapping Demo: [link](https://www.youtube.com/shorts/1S7ldnf2kuI)
 
-Autonomous navigation demo: [link](https://youtu.be/pdu4tVg_QxQ?si=NQ7DHxntDtQeoHpF)
+Autonomous Navigation Demo: [link](https://youtu.be/pdu4tVg_QxQ?si=NQ7DHxntDtQeoHpF)
+
+Real-World Robot Demo [link](https://www.youtube.com/shorts/1S7ldnf2kuI)
+
 
 ---
 ## 🧠 Engineering Highlights
