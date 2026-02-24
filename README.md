@@ -139,12 +139,28 @@ Measured during full operation:
 # 📂 Repository Structure
 
 
+```text
 AMR_Robot/
 ├── src/
-│ ├── hardware/ # Drivers & Communication
-│ ├── my_robot_description/ # URDF & TF definitions
-│ └── robot_bringup/ # System integration & launch
-
+│   ├── hardware/
+│   │   ├── ldlidar_ros2/
+│   │   ├── micro-ROS-Agent/
+│   │   ├── micro_ros_msgs/
+│   │   ├── ros2_astra_camera/
+│   │   └── my_robot_description/
+│   │       ├── config/
+│   │       ├── meshs/
+│   │       └── urdf/
+│   └── robot_bringup/
+│       ├── ESP32_code/
+│       ├── config/
+│       ├── launch/
+│       ├── maps/
+│       ├── HARDWARE_SPECIFICATIONS.md
+│       └── package.xml
+├── .gitignore
+└── README.md
+```
 
 The architecture follows a clear separation of concerns to ensure maintainability and scalability.
 
